@@ -165,8 +165,6 @@ int main(int argc, char *argv[])
   /* Your code here */
   struct process *current_process;
   u32 current_time = 0; // Tracks the current time of the scheduler
-  u32 total_waiting_time = 0;
-  u32 total_response_time = 0;
   u32 process_count = 0;
 
   // Main scheduling loop
