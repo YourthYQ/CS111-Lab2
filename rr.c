@@ -17,6 +17,7 @@ struct process
   u32 pid;
   u32 arrival_time;
   u32 burst_time;
+  u32 remaining_time;  // Add this line
 
   TAILQ_ENTRY(process) pointers;
 
@@ -148,70 +149,66 @@ int main(int argc, char *argv[])
 {
   if (argc != 3)
   {
+    fprintf(stderr, "Usage: %s <process file> <quantum>\n", argv[0]);
     return EINVAL;
   }
+
   struct process *data;
   u32 size;
   init_processes(argv[1], &data, &size);
-
-  u32 quantum_length = next_int_from_c_str(argv[2]);
+  u32 quantum = next_int_from_c_str(argv[2]);
 
   struct process_list list;
   TAILQ_INIT(&list);
 
+  for (u32 i = 0; i < size; i++)
+  {
+    TAILQ_INSERT_TAIL(&list, &data[i], pointers);
+  }
+
+  u32 current_time = 0;
   u32 total_waiting_time = 0;
   u32 total_response_time = 0;
-
-  /* Your code here */
-  struct process *current_process;
-  u32 current_time = 0; // Tracks the current time of the scheduler
   u32 process_count = 0;
 
   // Main scheduling loop
-  while (!TAILQ_EMPTY(&head)) {
-      current_process = TAILQ_FIRST(&head);
-      TAILQ_REMOVE(&head, current_process, entries);
+  while (!TAILQ_EMPTY(&list))
+  {
+    struct process *current_process = TAILQ_FIRST(&list);
+    TAILQ_REMOVE(&list, current_process, pointers);
 
-      // First time the process is being executed
-      if (!current_process->has_started) {
-          current_process->has_started = 1;
-          current_process->response_time = current_time - current_process->arrival_time;
-      }
+    if (!current_process->has_started)
+    {
+      current_process->has_started = 1;
+      current_process->response_time = current_time - current_process->arrival_time;
+    }
 
-      // Determine the time slice for the current execution
-      u32 time_slice = (current_process->remaining_time > quantum) ? quantum : current_process->remaining_time;
-      current_process->remaining_time -= time_slice;
-      current_time += time_slice;
+    u32 time_slice = (current_process->remaining_time > quantum) ? quantum : current_process->remaining_time;
+    current_process->remaining_time -= time_slice;
+    current_time += time_slice;
 
-      // Update waiting time for all processes in the queue
-      struct process *proc;
-      TAILQ_FOREACH(proc, &head, entries) {
-          proc->waiting_time += time_slice;
-      }
+    TAILQ_FOREACH(struct process *proc, &list, pointers)
+    {
+      proc->waiting_time += time_slice;
+    }
 
-      // If process is still not complete, re-enqueue it at the tail
-      if (current_process->remaining_time > 0) {
-          TAILQ_INSERT_TAIL(&head, current_process, entries);
-      } else {
-          // Compute total times for averages
-          total_waiting_time += current_process->waiting_time;
-          total_response_time += current_process->response_time;
-          process_count++;
-          free(current_process); // Free memory of completed process
-      }
+    if (current_process->remaining_time > 0)
+    {
+      TAILQ_INSERT_TAIL(&list, current_process, pointers);
+    }
+    else
+    {
+      total_waiting_time += current_process->waiting_time;
+      total_response_time += current_process->response_time;
+      process_count++;
+    }
   }
 
-  // Calculate average waiting and response times
-  if (process_count > 0) {
-      printf("Average waiting time: %.2f\n", (double)total_waiting_time / process_count);
-      printf("Average response time: %.2f\n", (double)total_response_time / process_count);
+  if (process_count > 0)
+  {
+    printf("Average waiting time: %.2f\n", (double)total_waiting_time / process_count);
+    printf("Average response time: %.2f\n", (double)total_response_time / process_count);
   }
-
-
-  /* End of "Your code here" */
-
-  printf("Average waiting time: %.2f\n", (float)total_waiting_time / (float)size);
-  printf("Average response time: %.2f\n", (float)total_response_time / (float)size);
 
   free(data);
   return 0;
