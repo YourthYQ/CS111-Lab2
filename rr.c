@@ -187,9 +187,9 @@ int main(int argc, char *argv[])
     current_process->remaining_time -= time_slice;
     current_time += time_slice;
 
-    TAILQ_FOREACH(struct process *proc, &list, pointers)
-    {
-      proc->waiting_time += time_slice;
+    struct process *proc;
+    TAILQ_FOREACH(proc, &list, pointers) {
+        proc->waiting_time += time_slice;
     }
 
     if (current_process->remaining_time > 0)
