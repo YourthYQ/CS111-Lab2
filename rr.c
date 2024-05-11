@@ -21,9 +21,9 @@ struct process
   TAILQ_ENTRY(process) pointers;
 
   /* Additional fields here */
-  int waiting_time;      // Total time spent waiting in the queue
-  int response_time;     // Time from arrival to first execution
-  int has_started;       // Flag to check if the process has started executing
+  u32 waiting_time;      // Total time spent waiting in the queue
+  u32 response_time;     // Time from arrival to first execution
+  u32 has_started;       // Flag to check if the process has started executing
   /* End of "Additional fields here" */
 };
 
@@ -164,10 +164,10 @@ int main(int argc, char *argv[])
 
   /* Your code here */
   struct process *current_process;
-  int current_time = 0; // Tracks the current time of the scheduler
-  int total_waiting_time = 0;
-  int total_response_time = 0;
-  int process_count = 0;
+  u32 current_time = 0; // Tracks the current time of the scheduler
+  u32 total_waiting_time = 0;
+  u32 total_response_time = 0;
+  u32 process_count = 0;
 
   // Main scheduling loop
   while (!TAILQ_EMPTY(&head)) {
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
       }
 
       // Determine the time slice for the current execution
-      int time_slice = (current_process->remaining_time > quantum) ? quantum : current_process->remaining_time;
+      u32 time_slice = (current_process->remaining_time > quantum) ? quantum : current_process->remaining_time;
       current_process->remaining_time -= time_slice;
       current_time += time_slice;
 
@@ -208,6 +208,7 @@ int main(int argc, char *argv[])
       printf("Average waiting time: %.2f\n", (double)total_waiting_time / process_count);
       printf("Average response time: %.2f\n", (double)total_response_time / process_count);
   }
+
 
   /* End of "Your code here" */
 
