@@ -220,6 +220,7 @@ int main(int argc, char *argv[]) {
         printf("Current_P:%d\n", current_process->pid);
         printf("Current_P_R_Time: %.2f\n", (float)current_process->response_time);
         
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (current_process->remaining_time > quantum_length) {
             
             // !!!!!!!!!!!
@@ -234,16 +235,18 @@ int main(int argc, char *argv[]) {
                 current_time++;
             }
             // !!!!!!!!!!!
-
-            // Check if the current_process is done
-            unsigned int difference = current_process->remaining_time - quantum_length;
-            if (difference == 0 || difference > current_process->remaining_time) {
-                current_process->remaining_time = 0;
-                current_process->isDone = true;
-            } else {
-                current_process->remaining_time -= quantum_length;
-            }
             
+        } else {
+            current_time += current_process->remaining_time;
+        }
+        
+        // Check if the current_process is done
+        unsigned int difference = current_process->remaining_time - quantum_length;
+        if (difference == 0 || difference > current_process->remaining_time) {
+            current_process->remaining_time = 0;
+            current_process->isDone = true;
+        } else {
+            current_process->remaining_time -= quantum_length;
         }
 
         // Remove the current_process in the list
