@@ -269,12 +269,25 @@ int main(int argc, char *argv[]) {
             current_process->remaining_time = 0;
             current_process->isDone = true;
             
+            // While current_process is done, then calculate its waiting time
             current_process->end_time = current_time;
             current_process->waiting_time = current_process->end_time - current_process->arrival_time - current_process->burst_time;
             total_waiting_time += current_process->waiting_time;
         } else {
-            current_process->remaining_time -= quantum_length;
+            current_process->remaining_time = difference;
         }
+        
+        
+        printf("Current_Time: %u\n", current_time);
+        printf("1_Response_Time: %u\n", data[0].response_time);
+        printf("1_Waiting_Time: %u\n", data[0].waiting_time);
+        printf("2_Response_Time: %u\n", data[1].response_time);
+        printf("2_Waiting_Time: %u\n", data[1].waiting_time);
+        
+        printf("Total_Response_Time: %u\n", total_response_time);
+        printf("Total_Waiting_Time: %u\n", total_waiting_time);
+
+        
 
         // Remove the current_process in the list
         TAILQ_REMOVE(&list, current_process, pointers);
