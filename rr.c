@@ -159,7 +159,7 @@ int compare_by_arrival_time(const void *a, const void *b) {
 int main(int argc, char *argv[]) {
     
     // If the quantum length is 0, then all average_time is 0 and return directly
-    if (argv[2] == 0) {
+    if (atoi(argv[2]) == 0) {
         u32 total_waiting_time = 0;
         u32 total_response_time = 0;
         
