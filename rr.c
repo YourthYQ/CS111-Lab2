@@ -26,6 +26,8 @@ struct process
   bool isDone; // will be initialized to false later
   bool isStarted; // will be initialized to false later
   u32 remaining_time;
+  u32 end_time;
+    
   u32 waiting_time;
   u32 response_time;
   /* End of "Additional fields here" */
@@ -201,6 +203,7 @@ int main(int argc, char *argv[]) {
         data[i].isDone = false;
         data[i].isStarted = false;
         data[i].remaining_time = data[i].burst_time;
+        data[i].end_time = 0;
     }
 
     // Main logic starts here
@@ -238,6 +241,11 @@ int main(int argc, char *argv[]) {
             
         } else {
             current_time += current_process->remaining_time;
+            current_process->remaining_time = 0;
+            
+            current_process->end_time = current_time;
+            current_process->waiting_time = current_process->end_time - current_process->arrival_time - current_process->burst_time;
+            total_waiting_time += current_process->waiting_time;
         }
         
         // Check if the current_process is done
