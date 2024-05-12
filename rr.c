@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
             
             for (int i = 0; i < current_process->remaining_time; i++) {
                 for (int j = 0; j < size; j++) {
-                    if (!data[j].isStarted && data[j].arrival_time == current_time) {
+                    if (!data[j].isInserted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
                         
                         data[j].isInserted = true;
