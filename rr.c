@@ -172,9 +172,17 @@ int main(int argc, char *argv[]) {
 
     u32 total_waiting_time = 0;
     u32 total_response_time = 0;
-
     
     /* Your code here */
+    if (argv[2] == 0) {
+        total_waiting_time = 0;
+        total_response_time = 0;
+        
+        printf("Average waiting time: %.2f\n", (float)total_waiting_time / (float)size);
+        printf("Average response time: %.2f\n", (float)total_response_time / (float)size);
+        
+        return 0;
+    }
     
     // Sorting the data array by arrival time
     qsort(data, size, sizeof(struct process), compare_by_arrival_time);
