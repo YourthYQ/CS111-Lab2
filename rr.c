@@ -261,9 +261,6 @@ int main(int argc, char *argv[]) {
                 current_time++;
             }
                         
-            current_process->end_time = current_time;
-            current_process->waiting_time = current_process->end_time - current_process->arrival_time - current_process->burst_time;
-            total_waiting_time += current_process->waiting_time;
         }
         
         // Check if the current_process is done
@@ -271,6 +268,10 @@ int main(int argc, char *argv[]) {
         if (difference == 0 || difference > current_process->remaining_time) {
             current_process->remaining_time = 0;
             current_process->isDone = true;
+            
+            current_process->end_time = current_time;
+            current_process->waiting_time = current_process->end_time - current_process->arrival_time - current_process->burst_time;
+            total_waiting_time += current_process->waiting_time;
         } else {
             current_process->remaining_time -= quantum_length;
         }
