@@ -176,10 +176,6 @@ int main(int argc, char *argv[]) {
     
     /* Your code here */
     
-    if () {
-        
-    }
-    
     // Sorting the data array by arrival time
     qsort(data, size, sizeof(struct process), compare_by_arrival_time);
     
