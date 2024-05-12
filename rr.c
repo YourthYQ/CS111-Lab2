@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
         }
         
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        if (current_process->remaining_time > quantum_length) {
+        if (current_process->remaining_time >= quantum_length) {
             
             // !!!!!!!!!!!
             
@@ -235,6 +235,21 @@ int main(int argc, char *argv[]) {
             }
             
             for (int i = 0; i < insert_time; i++) {
+                current_time++;
+                for (int j = 0; j < size; j++) {
+                    if (!data[j].isInserted && data[j].arrival_time == current_time) {
+                        TAILQ_INSERT_TAIL(&list, &data[j], pointers);
+                        
+                        data[j].isInserted = true;
+                        break;
+                    }
+                }
+            }
+            // !!!!!!!!!!!
+            
+        } else {
+            
+            for (int i = 0; i < current_process->remaining_time; i++) {
                 for (int j = 0; j < size; j++) {
                     if (!data[j].isInserted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
@@ -244,21 +259,6 @@ int main(int argc, char *argv[]) {
                     }
                 }
                 current_time++;
-            }
-            // !!!!!!!!!!!
-            
-        } else {
-            
-            for (int i = 0; i < current_process->remaining_time; i++) {
-                for (int j = 0; j < size; j++) {
-                    current_time++;
-                    if (!data[j].isInserted && data[j].arrival_time == current_time) {
-                        TAILQ_INSERT_TAIL(&list, &data[j], pointers);
-                        
-                        data[j].isInserted = true;
-                        break;
-                    }
-                }
             }
                         
             current_process->end_time = current_time;
