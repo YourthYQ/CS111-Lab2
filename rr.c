@@ -197,9 +197,14 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < size; i++) {
         data[i].isDone = false;
         data[i].isStarted = false;
-        data[i].isInserted = false;
         data[i].remaining_time = data[i].burst_time;
         data[i].end_time = 0;
+        
+        if (i == 0) {
+            data[i].isInserted = true;
+        } else {
+            data[i].isInserted = false;
+        }
     }
 
     // Main logic starts here
@@ -209,7 +214,7 @@ int main(int argc, char *argv[]) {
         // Extract the first pointer in the list as `current_process`
         struct process *current_process = TAILQ_FIRST(&list);
         
-        //
+        // Check if the current_process is started (whether first time executing)
         if (!current_process->isStarted) {
             current_process->isStarted = true;
             current_process->response_time = current_time - current_process->arrival_time;
@@ -217,7 +222,7 @@ int main(int argc, char *argv[]) {
         }
         
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        if (current_process->remaining_time >= quantum_length) {
+        if (current_process->remaining_time > quantum_length) {
             
             // !!!!!!!!!!!
             
@@ -230,7 +235,6 @@ int main(int argc, char *argv[]) {
             }
             
             for (int i = 0; i < insert_time; i++) {
-                current_time++;
                 for (int j = 0; j < size; j++) {
                     if (!data[j].isInserted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
@@ -239,6 +243,7 @@ int main(int argc, char *argv[]) {
                         break;
                     }
                 }
+                current_time++;
             }
             // !!!!!!!!!!!
             
@@ -246,6 +251,7 @@ int main(int argc, char *argv[]) {
             
             for (int i = 0; i < current_process->remaining_time; i++) {
                 for (int j = 0; j < size; j++) {
+                    current_time++;
                     if (!data[j].isInserted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
                         
@@ -253,11 +259,8 @@ int main(int argc, char *argv[]) {
                         break;
                     }
                 }
-                current_time++;
             }
-            
-            current_process->remaining_time = 0;
-            
+                        
             current_process->end_time = current_time;
             current_process->waiting_time = current_process->end_time - current_process->arrival_time - current_process->burst_time;
             total_waiting_time += current_process->waiting_time;
