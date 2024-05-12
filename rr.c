@@ -226,8 +226,9 @@ int main(int argc, char *argv[]) {
             u32 insert_time = MIN(current_process->remaining_time, quantum_length);
             for (int i = 0; i < insert_time; i++) {
                 for (int j = 0; j < size; j++) {
-                    if (data[j].arrival_time == current_time && !data[j].isStarted) {
+                    if (!data[j].isStarted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
+                        break;
                     }
                 }
                 current_time++;
