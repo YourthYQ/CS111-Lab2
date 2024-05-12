@@ -17,13 +17,16 @@ struct process
   u32 pid;
   u32 arrival_time;
   u32 burst_time;
-  u32 remaining_time;  // Add this line
-  u32 waiting_time;      // Total time spent waiting in the queue
-  u32 response_time;     // Time from arrival to first execution
-  u32 has_started;       // Flag to check if the process has started executing
-  u32 last_executed_time; // Last time this process was on CPU
-  u32 last_time_slice;    // Last time slice used by this process
+
   TAILQ_ENTRY(process) pointers;
+
+  /* Additional fields here */
+  bool isDone; // will be initialized to false later
+  bool isStarted; // will be initialized to false later
+  u32 remaining_time;
+  u32 start_exec_time;
+  u32 waiting_time;
+  u32 response_time;
   /* End of "Additional fields here" */
 };
 
@@ -144,80 +147,125 @@ void init_processes(const char *path,
   close(fd);
 }
 
-int main(int argc, char *argv[])
-{
-  if (argc != 3)
-    {
-        fprintf(stderr, "Usage: %s <process file> <quantum>\n", argv[0]);
-        return EINVAL;
-    }
 
+
+
+
+
+
+int compare_by_arrival_time(const void *a, const void *b) {
+    struct process *processA = (struct process *)a;
+    struct process *processB = (struct process *)b;
+    return processA->arrival_time - processB->arrival_time;
+}
+
+
+int main(int argc, char *argv[]) {
+    
+    if (argc != 3) {
+      return EINVAL;
+    }
     struct process *data;
     u32 size;
     init_processes(argv[1], &data, &size);
-    u32 quantum = next_int_from_c_str(argv[2]);
+
+    u32 quantum_length = next_int_from_c_str(argv[2]);
 
     struct process_list list;
     TAILQ_INIT(&list);
 
-    for (u32 i = 0; i < size; i++)
-    {
-        TAILQ_INSERT_TAIL(&list, &data[i], pointers);
-    }
-
-    u32 current_time = 0;
     u32 total_waiting_time = 0;
     u32 total_response_time = 0;
-    u32 process_count = 0;
 
-    // Main scheduling loop
-    while (!TAILQ_EMPTY(&list))
-    {
-        struct process *current_process = TAILQ_FIRST(&list);
+    
+    /* Your code here */
+    
+    // Sorting the data array by arrival time
+    qsort(data, size, sizeof(struct process), compare_by_arrival_time);
+    
+    printf("Sorted Process List:\n");
+    printf("Process ID | Arrival Time | Burst Time\n");
+    for (int i = 0; i < size; i++) {
+        printf("%10d | %12d | %10d\n", data[i].pid, data[i].arrival_time, data[i].burst_time);
+    }
+
+
+    // Insert the first process into the Tail_Queue
+    TAILQ_INSERT_TAIL(&list, &data[0], pointers);
+
+    // Log the current time
+    u32 current_time = 0;
+
+    // Initializes all process
+    for (int i = 0; i < size; i++) {
+        data[i].isDone = false;
+        data[i].isStarted = false;
+        data[i].remaining_time = data[i].burst_time;
+    }
+
+    // Main logic starts here
+    bool isFinish = false;
+    while(!isFinish) {
+
+      // Extract the first pointer in the list as `current_process`
+      struct process *current_process = TAILQ_FIRST(&list);
+
+      // Check if the current_process is started (whether first time executing)
+      if (!current_process->isStarted) {
+          current_process->start_exec_time = current_time;
+          current_process->isStarted = true;
+      }
+      
+
+      if (current_process->remaining_time > quantum_length) {
+
+        
+
+          // !!!!!!!!!!!
+          for (int i = 0; i < quantum_length; i++) {
+              for (int j = 0; j < size; j++) {
+                  if (data[j].arrival_time == current_time) {
+                      TAILQ_INSERT_TAIL(&list, &data[j], pointers);
+                  }
+              }
+              current_time++;
+          }
+          // !!!!!!!!!!!
+
+
+
+
+          // Check if the current_process is done
+          unsigned int difference = current_process->remaining_time - quantum_length;
+          if (difference == 0 || difference > current_process->remaining_time) {
+              current_process->remaining_time = 0;
+              current_process->isDone = true;
+          } else {
+              current_process->remaining_time -= quantum_length;
+          }
+
+        }
+
+        // Remove the current_process in the list
         TAILQ_REMOVE(&list, current_process, pointers);
 
-        if (!current_process->has_started)
-        {
-            current_process->has_started = 1;
-            current_process->response_time = current_time - current_process->arrival_time;
-        }
-        else
-        {
-            // Only add waiting time if the process has been started before
-            current_process->waiting_time += current_time - (current_process->last_executed_time + current_process->last_time_slice);
-        }
-
-        u32 time_slice = (current_process->remaining_time > quantum) ? quantum : current_process->remaining_time;
-        current_process->remaining_time -= time_slice;
-        current_process->last_executed_time = current_time; // Store last executed time
-        current_process->last_time_slice = time_slice; // Store the last time slice used
-        current_time += time_slice;
-
-        // Iterate over other processes and increase their waiting time
-        struct process *proc;
-        TAILQ_FOREACH(proc, &list, pointers) {
-            if (proc != current_process) { // Don't add to the current process
-                proc->waiting_time += time_slice;
+        // Check if all process is done
+        for (int i = 0; i < size; i++) {
+            if (data[i].isDone) {
+                isFinish = true;
+            } else {
+                isFinish = false;
+                break;
             }
         }
 
-        if (current_process->remaining_time > 0)
-        {
-            TAILQ_INSERT_TAIL(&list, current_process, pointers);
-        }
-        else
-        {
-            total_waiting_time += current_process->waiting_time;
-            total_response_time += current_process->response_time;
-            process_count++;
-        }
     }
 
-    if (process_count > 0)
-    {
-        printf("Average waiting time: %.2f\n", (double)total_waiting_time / process_count);
-        printf("Average response time: %.2f\n", (double)total_response_time / process_count);
-    }
+    
+    /* End of "Your code here" */
+
+    printf("Average waiting time: %.2f\n", (float)total_waiting_time / (float)size);
+    printf("Average response time: %.2f\n", (float)total_response_time / (float)size);
 
     free(data);
     return 0;
