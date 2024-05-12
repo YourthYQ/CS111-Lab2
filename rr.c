@@ -158,6 +158,18 @@ int compare_by_arrival_time(const void *a, const void *b) {
 
 int main(int argc, char *argv[]) {
     
+    // If the quantum length is 0, then all average_time is 0 and return directly
+    if (argv[2] == 0) {
+        total_waiting_time = 0;
+        total_response_time = 0;
+        
+        printf("Average waiting time: %.2f\n", (float)total_waiting_time;
+        printf("Average response time: %.2f\n", (float)total_response_time;
+        
+        return 0;
+    }
+    
+    
     if (argc != 3) {
       return EINVAL;
     }
@@ -173,18 +185,8 @@ int main(int argc, char *argv[]) {
     u32 total_waiting_time = 0;
     u32 total_response_time = 0;
     
-    /* Your code here */
     
-    // If the quantum length is 0, then all average_time is 0 and return directly
-    if (argv[2] == 0) {
-        total_waiting_time = 0;
-        total_response_time = 0;
-        
-        printf("Average waiting time: %.2f\n", (float)total_waiting_time / (float)size);
-        printf("Average response time: %.2f\n", (float)total_response_time / (float)size);
-        
-        return 0;
-    }
+    /* Your code here */
     
     // Sorting the data array by arrival time
     qsort(data, size, sizeof(struct process), compare_by_arrival_time);
@@ -231,6 +233,7 @@ int main(int argc, char *argv[]) {
             total_response_time += current_process->response_time;
         }
         
+        // Compare the value of `remaining_time of current_process` and `quantum_length`
         if (current_process->remaining_time >= quantum_length) {
                         
             // Find the min(current_process->remaining_time, quantum_length)
