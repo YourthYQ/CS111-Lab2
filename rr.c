@@ -12,6 +12,8 @@
 typedef uint32_t u32;
 typedef int32_t i32;
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 struct process
 {
   u32 pid;
@@ -215,14 +217,14 @@ int main(int argc, char *argv[]) {
             total_response_time += current_process->response_time;
         }
         
-        printf("Current_P:%d", current_process->pid);
+        printf("Current_P:%d\n", current_process->pid);
         printf("Current_P_R_Time: %.2f\n", (float)current_process->response_time);
         
         if (current_process->remaining_time > quantum_length) {
             
-            
             // !!!!!!!!!!!
-            for (int i = 0; i < quantum_length; i++) {
+            u32 insert_time = MIN(current_process->remaining_time, quantum_length);
+            for (int i = 0; i < insert_time; i++) {
                 for (int j = 0; j < size; j++) {
                     if (data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
@@ -231,7 +233,6 @@ int main(int argc, char *argv[]) {
                 current_time++;
             }
             // !!!!!!!!!!!
-
 
             // Check if the current_process is done
             unsigned int difference = current_process->remaining_time - quantum_length;
@@ -253,6 +254,11 @@ int main(int argc, char *argv[]) {
                 isFinish = true;
             } else {
                 isFinish = false;
+                
+                // Re-insert the `current_process` if no additional process in the list
+                if (TAILQ_EMPTY(&list)) {
+                    TAILQ_INSERT_TAIL(&list, current_process, pointers);
+                }
                 break;
             }
         }
