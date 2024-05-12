@@ -278,6 +278,8 @@ int main(int argc, char *argv[]) {
         // Remove the current_process in the list
         TAILQ_REMOVE(&list, current_process, pointers);
 
+        // Used to avoid double insert the same process
+        bool isInTheStack = false;
         // Check if all process is done
         for (int i = 0; i < size; i++) {
             if (data[i].isDone) {
@@ -288,12 +290,13 @@ int main(int argc, char *argv[]) {
                 // Re-insert the `current_process` if no additional process in the list
                 if (TAILQ_EMPTY(&list)) {
                     TAILQ_INSERT_TAIL(&list, current_process, pointers);
+                    isInTheStack = true;
                 }
                 break;
             }
         }
         
-        if (!isFinish && !current_process->isDone) {
+        if (!isInTheStack && !current_process->isDone) {
             TAILQ_INSERT_TAIL(&list, current_process, pointers);
         }
 
