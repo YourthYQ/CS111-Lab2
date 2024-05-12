@@ -220,9 +220,6 @@ int main(int argc, char *argv[]) {
             total_response_time += current_process->response_time;
         }
         
-        printf("Current_P:%d\n", current_process->pid);
-        printf("Current_P_R_Time: %.2f\n", (float)current_process->response_time);
-        
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (current_process->remaining_time > quantum_length) {
             
