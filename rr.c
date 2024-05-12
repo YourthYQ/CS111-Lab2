@@ -206,13 +206,6 @@ int main(int argc, char *argv[]) {
 
         // Extract the first pointer in the list as `current_process`
         struct process *current_process = TAILQ_FIRST(&list);
-
-        // Check if the current_process is started (whether first time executing)
-        if (!current_process->isStarted) {
-            current_process->isStarted = true;
-            current_process->response_time = current_time - current_process->arrival_time;
-            total_response_time += current_process->response_time;
-        }
         
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (current_process->remaining_time >= quantum_length) {
@@ -232,6 +225,14 @@ int main(int argc, char *argv[]) {
                 for (int j = 0; j < size; j++) {
                     if (!data[j].isStarted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
+                        
+                        // Check if the current_process is started (whether first time executing)
+                        if (!data[j].isStarted) {
+                            data[j].isStarted = true;
+                            data[j].response_time = current_time - data[j].arrival_time;
+                            total_response_time += data[j].response_time;
+                        }
+                        
                         break;
                     }
                 }
@@ -244,6 +245,14 @@ int main(int argc, char *argv[]) {
                 for (int j = 0; j < size; j++) {
                     if (!data[j].isStarted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
+                        
+                        // Check if the current_process is started (whether first time executing)
+                        if (!data[j].isStarted) {
+                            data[j].isStarted = true;
+                            data[j].response_time = current_time - data[j].arrival_time;
+                            total_response_time += data[j].response_time;
+                        }
+                        
                         break;
                     }
                 }
