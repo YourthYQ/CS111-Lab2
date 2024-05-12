@@ -12,8 +12,6 @@
 typedef uint32_t u32;
 typedef int32_t i32;
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 struct process
 {
   u32 pid;
@@ -150,10 +148,6 @@ void init_processes(const char *path,
   close(fd);
 }
 
-
-
-
-
 // Used to qsort the Processes' List by arrival_time
 int compare_by_arrival_time(const void *a, const void *b) {
     struct process *processA = (struct process *)a;
@@ -221,11 +215,32 @@ int main(int argc, char *argv[]) {
         }
         
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        if (current_process->remaining_time > quantum_length) {
+        if (current_process->remaining_time >= quantum_length) {
             
             // !!!!!!!!!!!
-            u32 insert_time = MIN(current_process->remaining_time, quantum_length);
+            
+            // Find the min(current_process->remaining_time, quantum_length)
+            u32 insert_time = 0;
+            if (current_process->remaining_time >= quantum_length) {
+                insert_time = quantum_length;
+            } else {
+                insert_time = current_process->remaining_time;
+            }
+            
             for (int i = 0; i < insert_time; i++) {
+                current_time++;
+                for (int j = 0; j < size; j++) {
+                    if (!data[j].isStarted && data[j].arrival_time == current_time) {
+                        TAILQ_INSERT_TAIL(&list, &data[j], pointers);
+                        break;
+                    }
+                }
+            }
+            // !!!!!!!!!!!
+            
+        } else {
+            
+            for (int i = 0; i < current_process->remaining_time; i++) {
                 for (int j = 0; j < size; j++) {
                     if (!data[j].isStarted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
@@ -234,10 +249,7 @@ int main(int argc, char *argv[]) {
                 }
                 current_time++;
             }
-            // !!!!!!!!!!!
             
-        } else {
-            current_time += current_process->remaining_time;
             current_process->remaining_time = 0;
             
             current_process->end_time = current_time;
@@ -277,7 +289,6 @@ int main(int argc, char *argv[]) {
         }
 
     }
-
     
     /* End of "Your code here" */
 
