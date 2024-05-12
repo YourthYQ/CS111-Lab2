@@ -23,6 +23,7 @@ struct process
   /* Additional fields here */
   bool isDone; // will be initialized to false later
   bool isStarted; // will be initialized to false later
+  bool isInserted; // will be initialized to false later
   u32 remaining_time;
   u32 end_time;
     
@@ -175,6 +176,10 @@ int main(int argc, char *argv[]) {
     
     /* Your code here */
     
+    if () {
+        
+    }
+    
     // Sorting the data array by arrival time
     qsort(data, size, sizeof(struct process), compare_by_arrival_time);
     
@@ -196,6 +201,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < size; i++) {
         data[i].isDone = false;
         data[i].isStarted = false;
+        data[i].isInserted = false;
         data[i].remaining_time = data[i].burst_time;
         data[i].end_time = 0;
     }
@@ -206,6 +212,13 @@ int main(int argc, char *argv[]) {
 
         // Extract the first pointer in the list as `current_process`
         struct process *current_process = TAILQ_FIRST(&list);
+        
+        //
+        if (!current_process->isStarted) {
+            current_process->isStarted = true;
+            current_process->response_time = current_time - current_process->arrival_time;
+            total_response_time += current_process->response_time;
+        }
         
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (current_process->remaining_time >= quantum_length) {
@@ -223,16 +236,10 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < insert_time; i++) {
                 current_time++;
                 for (int j = 0; j < size; j++) {
-                    if (!data[j].isStarted && data[j].arrival_time == current_time) {
+                    if (!data[j].isInserted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
                         
-                        // Check if the current_process is started (whether first time executing)
-                        if (!data[j].isStarted) {
-                            data[j].isStarted = true;
-                            data[j].response_time = current_time - data[j].arrival_time;
-                            total_response_time += data[j].response_time;
-                        }
-                        
+                        data[j].isInserted = true;
                         break;
                     }
                 }
@@ -246,13 +253,7 @@ int main(int argc, char *argv[]) {
                     if (!data[j].isStarted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
                         
-                        // Check if the current_process is started (whether first time executing)
-                        if (!data[j].isStarted) {
-                            data[j].isStarted = true;
-                            data[j].response_time = current_time - data[j].arrival_time;
-                            total_response_time += data[j].response_time;
-                        }
-                        
+                        data[j].isInserted = true;
                         break;
                     }
                 }
