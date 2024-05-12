@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
             }
         }
         
-        if (!current_process->isDone) {
+        if (!isFinish && !current_process->isDone) {
             TAILQ_INSERT_TAIL(&list, current_process, pointers);
         }
 
