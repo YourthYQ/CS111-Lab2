@@ -24,7 +24,6 @@ struct process
   bool isDone; // will be initialized to false later
   bool isStarted; // will be initialized to false later
   u32 remaining_time;
-  u32 start_exec_time;
   u32 waiting_time;
   u32 response_time;
   /* End of "Additional fields here" */
@@ -151,14 +150,12 @@ void init_processes(const char *path,
 
 
 
-
-
+// Used to qsort the Processes' List by arrival_time
 int compare_by_arrival_time(const void *a, const void *b) {
     struct process *processA = (struct process *)a;
     struct process *processB = (struct process *)b;
     return processA->arrival_time - processB->arrival_time;
 }
-
 
 int main(int argc, char *argv[]) {
     
@@ -183,12 +180,13 @@ int main(int argc, char *argv[]) {
     // Sorting the data array by arrival time
     qsort(data, size, sizeof(struct process), compare_by_arrival_time);
     
+    /* Debug: sorting
     printf("Sorted Process List:\n");
     printf("Process ID | Arrival Time | Burst Time\n");
     for (int i = 0; i < size; i++) {
         printf("%10d | %12d | %10d\n", data[i].pid, data[i].arrival_time, data[i].burst_time);
     }
-
+     */
 
     // Insert the first process into the Tail_Queue
     TAILQ_INSERT_TAIL(&list, &data[0], pointers);
@@ -207,43 +205,43 @@ int main(int argc, char *argv[]) {
     bool isFinish = false;
     while(!isFinish) {
 
-      // Extract the first pointer in the list as `current_process`
-      struct process *current_process = TAILQ_FIRST(&list);
+        // Extract the first pointer in the list as `current_process`
+        struct process *current_process = TAILQ_FIRST(&list);
 
-      // Check if the current_process is started (whether first time executing)
-      if (!current_process->isStarted) {
-          current_process->start_exec_time = current_time;
-          current_process->isStarted = true;
-      }
-      
-
-      if (current_process->remaining_time > quantum_length) {
-
+        // Check if the current_process is started (whether first time executing)
+        if (!current_process->isStarted) {
+            current_process->isStarted = true;
+            current_process->response_time = current_time - current_process->arrival_time;
+            total_response_time += current_process->response_time;
+        }
         
+        printf("Current_P:%d", current_process->pid);
+        printf("Current_P_R_Time: %.2f\n", (float)current_process->response_time);
+        
+        if (current_process->remaining_time > quantum_length) {
+            
+            
+            // !!!!!!!!!!!
+            for (int i = 0; i < quantum_length; i++) {
+                for (int j = 0; j < size; j++) {
+                    if (data[j].arrival_time == current_time) {
+                        TAILQ_INSERT_TAIL(&list, &data[j], pointers);
+                    }
+                }
+                current_time++;
+            }
+            // !!!!!!!!!!!
 
-          // !!!!!!!!!!!
-          for (int i = 0; i < quantum_length; i++) {
-              for (int j = 0; j < size; j++) {
-                  if (data[j].arrival_time == current_time) {
-                      TAILQ_INSERT_TAIL(&list, &data[j], pointers);
-                  }
-              }
-              current_time++;
-          }
-          // !!!!!!!!!!!
 
-
-
-
-          // Check if the current_process is done
-          unsigned int difference = current_process->remaining_time - quantum_length;
-          if (difference == 0 || difference > current_process->remaining_time) {
-              current_process->remaining_time = 0;
-              current_process->isDone = true;
-          } else {
-              current_process->remaining_time -= quantum_length;
-          }
-
+            // Check if the current_process is done
+            unsigned int difference = current_process->remaining_time - quantum_length;
+            if (difference == 0 || difference > current_process->remaining_time) {
+                current_process->remaining_time = 0;
+                current_process->isDone = true;
+            } else {
+                current_process->remaining_time -= quantum_length;
+            }
+            
         }
 
         // Remove the current_process in the list
