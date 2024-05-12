@@ -174,6 +174,8 @@ int main(int argc, char *argv[]) {
     u32 total_response_time = 0;
     
     /* Your code here */
+    
+    // If the quantum length is 0, then all average_time is 0 and return directly
     if (argv[2] == 0) {
         total_waiting_time = 0;
         total_response_time = 0;
@@ -229,11 +231,8 @@ int main(int argc, char *argv[]) {
             total_response_time += current_process->response_time;
         }
         
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (current_process->remaining_time >= quantum_length) {
-            
-            // !!!!!!!!!!!
-            
+                        
             // Find the min(current_process->remaining_time, quantum_length)
             u32 insert_time = 0;
             if (current_process->remaining_time >= quantum_length) {
@@ -247,13 +246,11 @@ int main(int argc, char *argv[]) {
                 for (int j = 0; j < size; j++) {
                     if (!data[j].isInserted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
-                        
                         data[j].isInserted = true;
                         break;
                     }
                 }
             }
-            // !!!!!!!!!!!
             
         } else {
             
@@ -261,7 +258,6 @@ int main(int argc, char *argv[]) {
                 for (int j = 0; j < size; j++) {
                     if (!data[j].isInserted && data[j].arrival_time == current_time) {
                         TAILQ_INSERT_TAIL(&list, &data[j], pointers);
-                        
                         data[j].isInserted = true;
                         break;
                     }
