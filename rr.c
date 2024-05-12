@@ -160,11 +160,11 @@ int main(int argc, char *argv[]) {
     
     // If the quantum length is 0, then all average_time is 0 and return directly
     if (argv[2] == 0) {
-        total_waiting_time = 0;
-        total_response_time = 0;
+        u32 total_waiting_time = 0;
+        u32 total_response_time = 0;
         
-        printf("Average waiting time: %.2f\n", (float)total_waiting_time;
-        printf("Average response time: %.2f\n", (float)total_response_time;
+        printf("Average waiting time: %.2f\n", (float)total_waiting_time);
+        printf("Average response time: %.2f\n", (float)total_response_time);
         
         return 0;
     }
